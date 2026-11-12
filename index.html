@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prefeitura de Arraial do Cabo · Portal do Cidadão</title>
+  <meta name="description" content="Portal Institucional e Serviços ao Cidadão da Prefeitura Municipal de Arraial do Cabo - RJ." />
+  <script>
+    window.__ERRORS = [];
+    window.addEventListener('error', (e) => {
+      const err = e.message + ' at ' + e.filename + ':' + e.lineno;
+      window.__ERRORS.push(err);
+      console.error('GLOBAL ERROR:', e);
+      try { fetch('/__debug_err?m=' + encodeURIComponent(err)); } catch(_) {}
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      const err = 'REJECTION: ' + (e.reason?.stack || e.reason);
+      window.__ERRORS.push(err);
+      console.error('UNHANDLED REJECTION:', e);
+      try { fetch('/__debug_err?m=' + encodeURIComponent(err)); } catch(_) {}
+    });
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css?v=6" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.min.js"
+      }
+    }
+  </script>
+</head>
+<body class="is-loading">
+  <!-- =====================================================================
+       LOADING PAGE (THREE.JS + GLSL PARTICLE MORPH PRELOADER)
+       ===================================================================== -->
+  <section id="preloader" class="preloader" aria-label="Tela de carregamento do Portal da Prefeitura de Arraial do Cabo">
+    <!-- Ambient coastal sand & water light subtle backdrop -->
+    <div class="preloader__ambient" aria-hidden="true"></div>
+
+    <!-- Three.js WebGL Stage -->
+    <div id="canvas-stage" class="preloader__stage" title="Arraste ou mova o cursor para interagir em 3D">
+      <canvas id="webgl-canvas"></canvas>
+      <div id="variant-label" class="variant-indicator-badge">Variante 1/5 · Brasão</div>
+    </div>
+
+    <!-- Top Institutional HUD -->
+    <header class="preloader__header">
+      <div class="brand-lockup">
+        <img
+          src="./assets/Logo_PMAC_Horizontal(1).png"
+          alt="Prefeitura de Arraial do Cabo - RJ"
+          class="brand-lockup__logo-img"
+        />
+      </div>
+
+      <div class="preloader__controls" role="toolbar" aria-label="Controles de visualização do carregamento">
+        <!-- Logo Variant Switcher (troca entre as variações) -->
+        <div class="variant-selector-wrap" role="group" aria-label="Selecionar variante do logo">
+          <button type="button" id="btn-variant-prev" class="control-pill control-pill--icon" title="Variante anterior (ou Seta Esquerda)">◀</button>
+          <div class="logo-switch">
+            <button type="button" class="logo-switch__btn is-active" aria-pressed="true" data-variant="0">Brasão</button>
+            <button type="button" class="logo-switch__btn" aria-pressed="false" data-variant="1">Brasão (JPG)</button>
+            <button type="button" class="logo-switch__btn" aria-pressed="false" data-variant="2">Vertical</button>
+            <button type="button" class="logo-switch__btn" aria-pressed="false" data-variant="3">Horizontal</button>
+            <button type="button" class="logo-switch__btn" aria-pressed="false" data-variant="4">Heráldico</button>
+          </div>
+          <button type="button" id="btn-variant-next" class="control-pill control-pill--icon" title="Próxima variante (ou Seta Direita)">▶</button>
+        </div>
+
+        <div class="mode-switch" role="group" aria-label="Modo de reprodução">
+          <button type="button" id="btn-mode-loop" class="mode-switch__btn is-active" aria-pressed="true">
+            <span class="dot-indicator"></span>
+            Loop 3D
+          </button>
+          <button type="button" id="btn-mode-portal" class="mode-switch__btn" aria-pressed="false">
+            Abrir Portal no 100%
+          </button>
+        </div>
+
+        <button type="button" id="btn-replay" class="control-pill" title="Reiniciar ciclo de animação">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+          <span>Replay</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Bottom Progress & Phase Choreography HUD -->
+    <footer class="preloader__footer">
+      <!-- Interactive 4-Phase Stepper: Ondas -> Espiral -> Logo Partículas -> Explosão -->
+      <nav class="phase-pills-nav" aria-label="Estágios da animação 3D">
+        <button type="button" class="phase-pill is-active" data-phase="0">
+          <span class="phase-pill__num">01</span>
+          <span class="phase-pill__label">Ondas</span>
+        </button>
+        <button type="button" class="phase-pill" data-phase="1">
+          <span class="phase-pill__num">02</span>
+          <span class="phase-pill__label">Espiral</span>
+        </button>
+        <button type="button" class="phase-pill" data-phase="2">
+          <span class="phase-pill__num">03</span>
+          <span class="phase-pill__label">Logo Partículas</span>
+        </button>
+        <button type="button" class="phase-pill" data-phase="3">
+          <span class="phase-pill__num">04</span>
+          <span class="phase-pill__label">Explosão</span>
+        </button>
+      </nav>
+
+      <!-- Progress Bar & Status Row -->
+      <div class="progress-panel" role="region" aria-live="polite">
+        <div class="progress-panel__meta">
+          <div class="status-line">
+            <span class="status-line__pulse" aria-hidden="true"></span>
+            <span id="loading-status-text" class="status-line__text">
+              Inicializando ambiente seguro do Portal do Cidadão...
+            </span>
+          </div>
+
+          <div class="progress-panel__right">
+            <span id="loading-percent" class="progress-panel__percent" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              00%
+            </span>
+            <button type="button" id="btn-enter-portal" class="enter-portal-btn">
+              <span>Acessar Portal</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="progress-track" aria-hidden="true">
+          <div id="progress-fill" class="progress-track__fill"></div>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <!-- =====================================================================
+       PORTAL INSTITUCIONAL · PREFEITURA DE ARRAIAL DO CABO (DESTINO)
+       ===================================================================== -->
+  <main id="portal-view" class="portal" aria-hidden="true">
+    <header class="portal-nav">
+      <div class="portal-nav__inner">
+        <div class="brand-lockup">
+          <img
+            src="./assets/Logo_PMAC_Horizontal(1).png"
+            alt="Prefeitura Municipal de Arraial do Cabo"
+            class="brand-lockup__logo-img portal-logo-img"
+          />
+        </div>
+
+        <nav class="portal-nav__links" aria-label="Navegação principal">
+          <a href="#servicos" class="portal-nav__link is-current">Serviços ao Cidadão</a>
+          <a href="#transparencia" class="portal-nav__link">Transparência</a>
+          <a href="#diario" class="portal-nav__link">Diário Oficial</a>
+          <a href="#ouvidoria" class="portal-nav__link">Ouvidoria</a>
+        </nav>
+
+        <div class="portal-nav__actions">
+          <button type="button" id="btn-back-to-loader" class="btn-return-loader">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <span>Ver Loading 3D</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section class="portal-hero">
+      <div class="portal-hero__container">
+        <div class="portal-hero__badge">
+          <span class="portal-hero__badge-dot"></span>
+          <span>ATENDIMENTO DIGITAL INTEGRADO · ARRAIAL DO CABO</span>
+        </div>
+
+        <h1 class="portal-hero__title">
+          Serviços municipais rápidos, transparentes e sem filas.
+        </h1>
+        <p class="portal-hero__subtitle">
+          Emita guias de IPTU, consulte protocolos, acesse notas fiscais e acompanhe o Portal da Transparência da Prefeitura Municipal de Arraial do Cabo.
+        </p>
+
+        <form class="portal-search" onsubmit="event.preventDefault();">
+          <div class="portal-search__input-wrap">
+            <svg class="portal-search__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              type="search"
+              id="service-search-input"
+              class="portal-search__input"
+              placeholder="O que você procura hoje? (Ex.: 2ª via de IPTU, Protocolo, Nota Fiscal, Diário Oficial...)"
+              aria-label="Buscar serviço municipal"
+            />
+            <button type="submit" class="portal-search__submit">Buscar Serviço</button>
+          </div>
+
+          <div class="portal-search__tags">
+            <span class="portal-search__tags-label">Mais buscados:</span>
+            <button type="button" class="tag-chip" data-filter="IPTU">2ª Via IPTU 2026</button>
+            <button type="button" class="tag-chip" data-filter="Protocolo">Consultar Protocolo</button>
+            <button type="button" class="tag-chip" data-filter="Nota Fiscal">Nota Fiscal (NFS-e)</button>
+            <button type="button" class="tag-chip" data-filter="Transparência">Diário Oficial</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="servicos" class="portal-services">
+      <div class="portal-services__container">
+        <div class="section-head">
+          <div>
+            <span class="section-head__eyebrow">Acesso Direto</span>
+            <h2 class="section-head__title">Principais Serviços ao Cidadão e Empresas</h2>
+          </div>
+          <span class="section-head__badge">Disponível 24h</span>
+        </div>
+
+        <div class="services-grid" id="services-grid">
+          <article class="service-card" data-keywords="IPTU Tributos Certidão Imóvel Boleto">
+            <div class="service-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+            </div>
+            <div class="service-card__body">
+              <span class="service-card__category">Fazenda e Tributos</span>
+              <h3 class="service-card__title">2ª Via de IPTU e Certidões</h3>
+              <p class="service-card__desc">
+                Emissão de guias em cota única ou parcelada, consulta de débitos imobiliários e Certidão Negativa.
+              </p>
+            </div>
+            <span class="service-card__cta">Acessar serviço →</span>
+          </article>
+
+          <article class="service-card" data-keywords="Protocolo Digital Processos Requerimento">
+            <div class="service-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+            </div>
+            <div class="service-card__body">
+              <span class="service-card__category">Administração</span>
+              <h3 class="service-card__title">Protocolo Digital</h3>
+              <p class="service-card__desc">
+                Abra requerimentos administrativos, anexe documentos e acompanhe a tramitação de processos online.
+              </p>
+            </div>
+            <span class="service-card__cta">Consultar processo →</span>
+          </article>
+
+          <article class="service-card" data-keywords="Transparência Diário Oficial Licitações Contratos">
+            <div class="service-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+            </div>
+            <div class="service-card__body">
+              <span class="service-card__category">Controle e Cidadania</span>
+              <h3 class="service-card__title">Portal da Transparência & D.O.</h3>
+              <p class="service-card__desc">
+                Execução orçamentária em tempo real, editais de licitação, folha de pagamento e Diário Oficial Eletrônico.
+              </p>
+            </div>
+            <span class="service-card__cta">Abrir transparência →</span>
+          </article>
+
+          <article class="service-card" data-keywords="Nota Fiscal NFS-e ISS Empresas Alvará">
+            <div class="service-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="M7 15h0M2 9.5h20" />
+              </svg>
+            </div>
+            <div class="service-card__body">
+              <span class="service-card__category">Empresas e ISS</span>
+              <h3 class="service-card__title">Nota Fiscal Eletrônica (NFS-e)</h3>
+              <p class="service-card__desc">
+                Sistema municipal para prestadores de serviços, emissão de NFS-e, guias de ISSQN e alvará digital.
+              </p>
+            </div>
+            <span class="service-card__cta">Emitir nota →</span>
+          </article>
+
+          <article class="service-card" data-keywords="Ouvidoria e-SIC Atendimento Iluminação Limpeza">
+            <div class="service-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <div class="service-card__body">
+              <span class="service-card__category">Participação Social</span>
+              <h3 class="service-card__title">Ouvidoria Geral e e-SIC</h3>
+              <p class="service-card__desc">
+                Registre solicitações de zeladoria urbana, elogios, denúncias ou pedidos de acesso à informação.
+              </p>
+            </div>
+            <span class="service-card__cta">Falar com a Ouvidoria →</span>
+          </article>
+
+          <article class="service-card" data-keywords="Turismo Bandeira Azul Praias Mergulho Ambiental">
+            <div class="service-card__icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12h20" />
+                <path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" />
+                <path d="m4 8 8-4 8 4" />
+              </svg>
+            </div>
+            <div class="service-card__body">
+              <span class="service-card__category">Turismo & Ambiente</span>
+              <h3 class="service-card__title">Ordenamento Turístico e Praias</h3>
+              <p class="service-card__desc">
+                Credenciamento de embarcações, informações sobre praias certificadas Bandeira Azul e preservação costeira.
+              </p>
+            </div>
+            <span class="service-card__cta">Consultar normas →</span>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./preloader3d.js?v=6"></script>
+</body>
+</html>

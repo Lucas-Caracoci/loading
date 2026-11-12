@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demonstração Web Component · Prefeitura de Arraial do Cabo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: #F4F6F9;
+      color: #1A2638;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top simulated portal bar */
+    .gov-topbar {
+      background: #2F4469;
+      color: #FFFFFF;
+      padding: 10px 24px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .gov-topbar a { color: #DFD6BD; text-decoration: none; font-weight: 500; }
+
+    .site-header {
+      background: #FFFFFF;
+      border-bottom: 1px solid #E1E6EE;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .site-header img {
+      height: 44px;
+    }
+    .badge-dev {
+      background: #E8F4FB;
+      color: #108FCE;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(16, 143, 206, 0.25);
+    }
+
+    /* Main simulated content */
+    .main-content {
+      max-width: 1100px;
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 20px;
+      flex: 1;
+    }
+
+    .hero-banner {
+      background: linear-gradient(135deg, #2F4469 0%, #1A2C49 100%);
+      color: #FFFFFF;
+      padding: 40px;
+      border-radius: 16px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      right: -40px;
+      bottom: -40px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(16, 143, 206, 0.35) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero-banner h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .hero-banner p {
+      color: #DFD6BD;
+      font-size: 15px;
+      max-width: 650px;
+      line-height: 1.5;
+    }
+
+    /* Cards grid */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+    .card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .card h3 {
+      font-size: 17px;
+      color: #2F4469;
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 13.5px;
+      color: #556987;
+      line-height: 1.45;
+    }
+
+    /* Developer Playground Box */
+    .dev-panel {
+      background: #FFFFFF;
+      border: 2px dashed #108FCE;
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+    .dev-panel h2 {
+      font-size: 18px;
+      color: #2F4469;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dev-panel p.desc {
+      font-size: 13.5px;
+      color: #64748B;
+      margin-bottom: 18px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .btn {
+      background: #2F4469;
+      color: #FFFFFF;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: #1F304E; }
+    .btn--secondary { background: #108FCE; }
+    .btn--secondary:hover { background: #0C75A9; }
+    .btn--outline {
+      background: transparent;
+      color: #2F4469;
+      border: 1px solid #CBD5E1;
+    }
+    .btn--outline:hover { background: #F1F5F9; }
+
+    .code-preview {
+      background: #0F172A;
+      color: #E2E8F0;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      overflow-x: auto;
+      margin-bottom: 14px;
+    }
+    .log-box {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #334155;
+      min-height: 48px;
+    }
+  </style>
+
+  <!-- =========================================================================
+       IMPORTA O WEB COMPONENT (APENAS 1 LINHA DE SCRIPT)
+       ========================================================================= -->
+  <script type="module" src="./pmac-preloader.js?v=6"></script>
+</head>
+<body>
+
+  <!-- =========================================================================
+       O WEB COMPONENT SENDO UTILIZADO NA PÁGINA (auto-dismiss="false" para visualização contínua)
+       ========================================================================= -->
+  <pmac-preloader 
+    id="preloader-instance"
+    logo="brasao" 
+    min-duration="4500" 
+    status-text="Conectando à Secretaria Municipal de Fazenda e Finanças..."
+    auto-dismiss="false">
+  </pmac-preloader>
+
+  <!-- Barra Governamental -->
+  <div class="gov-topbar">
+    <span>Prefeitura Municipal de Arraial do Cabo · Estado do Rio de Janeiro</span>
+    <a href="./index.html">← Voltar ao Modo Completo 3D</a>
+  </div>
+
+  <!-- Cabeçalho do Site -->
+  <header class="site-header">
+    <img src="./assets/Logo_PMAC_Horizontal(1).png" alt="Prefeitura de Arraial do Cabo" />
+    <span class="badge-dev">Secretaria de Fazenda · Portal de Tributos</span>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="main-content">
+    
+    <div class="hero-banner">
+      <h1>Portal do Contribuinte e Fazenda Municipal</h1>
+      <p>Este é um exemplo de página real da prefeitura. Quando você abriu a página, o Web Component <code>&lt;pmac-preloader&gt;</code> executou as ondas de Arraial do Cabo, formou o brasão e desapareceu suavemente com Shadow DOM isolado.</p>
+    </div>
+
+    <!-- Painel de Testes para o Desenvolvedor -->
+    <section class="dev-panel">
+      <h2>🛠️ Laboratório de Testes do Web Component</h2>
+      <p class="desc">Teste em tempo real como o componente se comporta ao ser injetado com diferentes atributos na página:</p>
+
+      <div class="btn-group">
+        <button class="btn" onclick="testComponent('brasao', 2400, 'Carregando certidões negativas...')">
+          🔄 Rodar com Brasão (2.4s)
+        </button>
+        <button class="btn btn--secondary" onclick="testComponent('vertical', 2600, 'Autenticando no Protocolo Geral...')">
+          🔄 Rodar com Logo Vertical
+        </button>
+        <button class="btn btn--secondary" onclick="testComponent('horizontal', 2600, 'Inicializando Diário Oficial...')">
+          🔄 Rodar com Logo Horizontal
+        </button>
+        <button class="btn btn--outline" onclick="testComponent('heraldico', 2400, 'Conectando ao Acervo Histórico...')">
+          🔄 Rodar com Brasão Heráldico
+        </button>
+      </div>
+
+      <p style="font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #2F4469;">Código HTML utilizado:</p>
+      <div id="code-snippet" class="code-preview">&lt;pmac-preloader logo="brasao" min-duration="2400" status-text="Conectando à Secretaria de Fazenda..."&gt;&lt;/pmac-preloader&gt;</div>
+
+      <p style="font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #2F4469;">Registro de Eventos disparados pelo componente:</p>
+      <div id="event-log" class="log-box">[Pronto] Aguardando eventos do componente...</div>
+    </section>
+
+    <!-- Cards de Serviços -->
+    <div class="services-grid">
+      <div class="card">
+        <h3>IPTU 2026</h3>
+        <p>Emissão de 2ª via de cota única com desconto e parcelamentos vigentes.</p>
+      </div>
+      <div class="card">
+        <h3>Nota Fiscal Avulsa (NFS-e)</h3>
+        <p>Acesso ao sistema de escrituração fiscal eletrônica do município.</p>
+      </div>
+      <div class="card">
+        <h3>Certidão Negativa de Débitos</h3>
+        <p>Validação e emissão instantânea de CND para pessoas físicas e jurídicas.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const eventLog = document.getElementById('event-log');
+    const codeSnippet = document.getElementById('code-snippet');
+
+    function log(msg) {
+      const now = new Date().toLocaleTimeString();
+      eventLog.textContent = `[${now}] ${msg}`;
+    }
+
+    // Ouve o evento emitido pelo Web Component
+    document.addEventListener('complete', (e) => {
+      log("Evento 'complete' disparado! O preloader terminou e se auto-destruiu da memória.");
+    });
+
+    function testComponent(logo, duration, status) {
+      // Remove qualquer preloader anterior
+      const existing = document.querySelector('pmac-preloader');
+      if (existing) existing.remove();
+
+      // Cria dinamicamente a tag <pmac-preloader>
+      const preloader = document.createElement('pmac-preloader');
+      preloader.setAttribute('logo', logo);
+      preloader.setAttribute('min-duration', duration);
+      preloader.setAttribute('status-text', status);
+      preloader.setAttribute('auto-dismiss', 'true');
+
+      document.body.prepend(preloader);
+
+      codeSnippet.textContent = `<pmac-preloader logo="${logo}" min-duration="${duration}" status-text="${status}"></pmac-preloader>`;
+      log(`Novo <pmac-preloader logo="${logo}"> criado e montado no DOM.`);
+    }
+  </script>
+
+</body>
+</html>
